@@ -199,6 +199,11 @@ class Vector():
                              "".format(type(other)))
         return len(self) == len(other) and self._vector == other.value
 
+
+    def __hash__(self):
+        return self.to_str()
+
+
     def __ne__(self, other):
         """Return True if self != other, else return False."""
         return not self == other
