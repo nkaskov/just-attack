@@ -206,20 +206,49 @@ class Matrix():
             (row.value for row in self),
             self.ncolumns)
 
-    def submatrix(self, columns=None):
+    def subcolumns(self, columns=None, remove=False):
         """Return matrix contained in columns."""
-        if not columns:
-            return self
-        columns = tuple(columns)
-        sub_matr = []
+        if not remove:
+            if not columns:
+                return self
+            columns = tuple(columns)
+            sub_matr = []
+            for row in self:
+                value = 0
+                for i in columns:
+                    value <<= 1
+                    if row[i]:
+                        value ^= 1
+                sub_matr.append(value)
+            return Matrix(sub_matr, len(columns))
+        else:
+            all_columns = range(0, self._ncolumns)
+            new_columns = [x for x in all_columns if x not in columns]
+            return self.subcolumns(new_columns)
+
+    def subrows(self, rows=None):
+        row_list = []
+        i = 0
+
         for row in self:
-            value = 0
-            for i in columns:
-                value <<= 1
-                if row[i]:
-                    value ^= 1
-            sub_matr.append(value)
-        return Matrix(sub_matr, len(columns))
+            if i not in rows:
+                row_list.append(row)
+            i+=1
+
+        return Matrix(row_list)
+
+    def subrows_remove_first_k(self, k):
+        row_list = []
+        i = 0
+
+        for row in self:
+            if i >= k:
+                row_list.append(row)
+            i+=1
+
+        return from_vectors(row_list)
+
+
 
     def transpose(self):
         """Return transposition of matrix."""
