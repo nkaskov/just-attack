@@ -1,13 +1,4 @@
 """Unit tests for matrix module."""
-import os
-import sys
-
-pwd=os.getcwd()
-
-#For TEST purposes only we add two paths
-#So now we can call this module from direcrories modules/ and modules/%this_module%
-sys.path.append(pwd+"\\..")
-sys.path.append(pwd)
 
 import unittest
 from blincodes import matrix
@@ -1123,8 +1114,4 @@ class GenerateMatrixTestCase(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    #unittest.main()
-
-    matr = matrix.random(10)
-
-    print(matr)
+    unittest.main()

@@ -30,7 +30,7 @@ def gauss_by_min_weighted_row ():
 
 		rmcg = rmc.gaussian_elimination(sample)
 
-		rmcgr = rmcg.subcolumns(sample, True)
+		rmcgr = rmcg.submatrix(sample, True)
 
 		
 		j = 0
@@ -48,7 +48,7 @@ def gauss_by_min_weighted_row ():
 
 				#print (rmcga)
 
-				rmcgac = rmcga[len(rmcgrow_ones):].subcolumns(rmcgrow_ones, True)
+				rmcgac = rmcga[len(rmcgrow_ones):].submatrix(rmcgrow_ones, True)
 
 				return rmcgac
 
@@ -73,7 +73,7 @@ def gauss_codewords_with_weight_in_range (M, eps):
 
 		rmcg = rmc.gaussian_elimination(sample)
 
-		rmcgr = rmcg.subcolumns(sample, True)
+		rmcgr = rmcg.submatrix(sample, True)
 
 		
 		j = 0
