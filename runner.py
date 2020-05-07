@@ -1,6 +1,6 @@
 
 import random
-
+from scipy.special import binom
 from math import *
 
 import networkx as nx
@@ -156,12 +156,9 @@ def inner_algo(rmcgac, L):
 		M = L * 2**(2*r - 1)
 
 		print("M", M, "\n")
-		#c = ceil( L * (2**(m - r + 1) - 2**r) / (2**(m - r) - 1))
-		c = 50
+		c = ceil( L * (2**(m - r + 1) - 2**r) / (2**(m - r) - 1))
 
 		codewords_supports = gauss_codewords_supports_with_weight_in_range(rmcgac, M, eps)
-
-
 
 		for i in range(0, word_len):
 			for j in range(i + 1, word_len):
@@ -181,6 +178,31 @@ def inner_algo(rmcgac, L):
 
 			
 		try_it += 1			
+
+
+def get_b(pbk):
+	B = []
+
+	desired_b_size = 0
+
+	for i in range (0, r - 1):
+		desired_b_size += binom(m, i)
+
+
+	while (True):
+		codeword_support = gauss_codeword_support_with_weight(pbk)
+
+		pbkc = gauss_by_min_weighted_row(pbk, codeword_support)
+
+		fs = inner_algo(pbkc, 100)
+
+		for f in fs:
+			f.extend(codeword_support)
+
+
+		B = tools.union(B, fs)
+
+
 
 
 
@@ -210,6 +232,6 @@ print(result_cliques)
 
 
 codeword_support = gauss_codeword_support_with_weight(pubkey)
-print(codeword_support)
+#print(codeword_support)
 
-print(gauss_by_min_weighted_row(pubkey, codeword_support))
+#print(gauss_by_min_weighted_row(pubkey, codeword_support))
