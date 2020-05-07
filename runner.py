@@ -27,9 +27,22 @@ def gauss_by_min_weighted_row (irmc, codeword_support):
 
 	print(rmcga)
 
-	rmcgac = rmcga[len(codeword_support):].submatrix(codeword_support, True)
+	#rmcgac = rmcga[len(codeword_support):].submatrix(codeword_support, True)
 
-	return rmcgac
+	to_remove = []
+
+	j = 0
+
+	for row in rmcga:
+		if len([value for value in row.support if value in codeword_support]):
+			to_remove.append(j)
+		j+=1
+
+	rmcgar = rmcga.T.submatrix(to_remove, True).T.submatrix(codeword_support, True)
+
+	print()
+
+	return rmcgar
 
 
 
@@ -237,4 +250,4 @@ print(result_cliques)
 codeword_support = gauss_codeword_support_with_weight(pubkey)
 #print(codeword_support)
 
-#print(gauss_by_min_weighted_row(pubkey, codeword_support))
+print(gauss_by_min_weighted_row(pubkey, codeword_support))
