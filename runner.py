@@ -66,14 +66,14 @@ def gauss_by_min_weighted_row (rmc):
 
 def gauss_codeword_support_with_weight(irmc, desired_weight = 2**(m - r)):
 
-	code_words = [vec for vec in tools.iter_codewords(irmc) if vec.hamming_weight == desired_weight]
-
 	print("Desired weight", desired_weight)
 
-	print(code_words)
+	for vec in tools.iter_codewords(irmc):
+		if vec.hamming_weight == desired_weight:
+			return vec.support
 
-	if len(code_words):
-		return code_words[0].support
+	print("Bad weight")
+
 
 def gauss_codewords_supports_with_weight_in_range (irmc, M, eps):
 
@@ -83,12 +83,16 @@ def gauss_codewords_supports_with_weight_in_range (irmc, M, eps):
 
 	print("Desired weight", desired_weight_min, desired_weight_max)
 
-	code_words = [vec for vec in tools.iter_codewords(irmc) if vec.hamming_weight >= desired_weight_min and vec.hamming_weight <= desired_weight_max]
+	codewords_supports = []
 
-	if len(code_words) >= M:
-		return [vec.support for vec in code_words]
-	else:
-		print("[-] Not enought words")
+	for vec in tools.iter_codewords(irmc):
+		if vec.hamming_weight >= desired_weight_min and vec.hamming_weight <= desired_weight_max:
+			codewords_supports.append(vec.support)
+			print("Found", len(codewords_supports), "from", M)
+			if len(codewords_supports) == M:
+				return codewords_supports
+
+	print("Bad weight")
 
 def is_graph_ok(Gi):
 
