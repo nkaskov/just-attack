@@ -202,6 +202,9 @@ def get_b(pbk):
 
 		B = tools.union(B, fs)
 
+		if len(B) == desired_b_size:
+			return B
+
 
 
 
