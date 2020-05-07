@@ -210,10 +210,10 @@ def inner_algo(rmcgac, L):
 							#print("Add",i,",",j)
 							G.add_edge(i,j)
 
+		good_cliques = get_good_cliques(G)
 
-
-		if is_graph_ok(G):
-			return get_good_cliques(G)
+		if len(good_cliques):
+			return good_cliques
 		else:
 			L += step_L
 
