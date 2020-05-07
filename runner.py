@@ -23,7 +23,7 @@ def gauss_by_min_weighted_row (irmc, codeword_support):
 	
 	rmcga = irmc.gaussian_elimination(codeword_support)
 
-	print("rmcgs:")
+	print("rmcga:")
 
 	print(rmcga)
 
@@ -208,6 +208,8 @@ result_cliques = inner_algo(rmcgac, 5)
 print(result_cliques)
 '''
 
-print(gauss_codeword_support_with_weight(pubkey))
 
-print(gauss_by_min_weighted_row(pubkey, gauss_codeword_support_with_weight(pubkey)))
+codeword_support = gauss_codeword_support_with_weight(pubkey)
+print(codeword_support)
+
+print(gauss_by_min_weighted_row(pubkey, codeword_support))
