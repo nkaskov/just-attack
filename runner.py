@@ -120,22 +120,58 @@ def is_graph_ok(Gi):
 
 		for clique in cliques:
 			clique_len = len(clique)
-			print("Checking",clique)
+			#print("Checking",clique)
 			if clique_len >= desired_clique_size:
 				if not clique_len % desired_clique_size:
 					good_cliques += clique_len / desired_clique_size
-					print("Found good cliques", good_cliques)
+					#print("Found good cliques", good_cliques)
 					G.remove_nodes_from(clique)
 					lol= False
 					break
 
 		if lol:
-			print ("There are some bad cliques")
+			print ("[ ]\tThere are some bad cliques")
 			return False
 
 		if good_cliques == desired_number_of_cliques:
-			print("Graph consist only of good cliques")
+			print("[+]\tGraph consist only of good cliques")
 			return True
+
+def get_good_cliques(Gi):
+
+	desired_clique_size = 3
+	desired_number_of_cliques = 5
+
+	G = Gi.copy()
+
+
+	result_cliques = []
+
+	while (True):
+
+		cliques = nx.find_cliques(G)
+
+		lol = True
+
+		for clique in cliques:
+			clique_len = len(clique)
+			if clique_len >= desired_clique_size:
+				if not clique_len % desired_clique_size:
+
+					for i in range(0, int(clique_len / desired_clique_size)):
+						result_cliques.append(clique[i*desired_clique_size: (i + 1)*desired_clique_size])
+
+					G.remove_nodes_from(clique)
+					lol= False
+					break
+
+		if lol:
+			print ("[-]\tThere are some bad cliques")
+			return []
+
+		if len(result_cliques) == desired_number_of_cliques:
+			print("Graph consist only of good cliques")
+			return result_cliques
 
 def inner_algo(rmcgac, L):
 	
@@ -177,14 +213,7 @@ def inner_algo(rmcgac, L):
 
 
 		if is_graph_ok(G):
-			print("All cliques:")
-
-			cliques = nx.find_cliques(G)
-
-
-			for clique in cliques:
-				print(clique)
-			return nx.find_cliques(G)
+			return get_good_cliques(G)
 		else:
 			L += step_L
 
@@ -204,4 +233,6 @@ rmcgac = gauss_by_min_weighted_row(rmc)
 #print("Result:")
 print(rmcgac)
 
-inner_algo(rmcgac, 5)
+result_cliques = inner_algo(rmcgac, 5)
+
+print(result_cliques)
