@@ -13,7 +13,7 @@ from blincodes import vector
 from blincodes.codes import tools
 
 r = 2
-m = 5
+m = 7
 
 
 
@@ -64,45 +64,49 @@ def gauss_by_min_weighted_row (rmc):
 	print("[-]\tout of tries while doing gauss_by_min_weighted_row")
 
 
+def gauss_codewords_supports_with_weight(irmc, weight = 2**(m - r)):
 
-def gauss_codewords_supports_with_weight_in_range (rmc, M, eps):
+	code_words = [vec.value for vec in tools.iter_codewords(irmc)]
 
-	k = rmc.nrows
-	n = rmc.ncolumns
+	desired_weight = weight
 
+	print("Desired weight", desired_weight)
 
-	max_tries = 50000
-	desired_weight_min = 2**(m - r) - 1
-	desired_weight_max = floor(float(2**(m - 2*r + 1)*(2**r - 1))*eps) - 1
 
 	codewords_supports = []
 
-	for i in range(0, max_tries):
-		#print ("[ ]\ttry to find codewords_supports", i, "found", len(codewords_supports), "need", M)
-		sample = random.sample(range(0, n), k)
+	word_len = 2**m - 2**(m - r)
 
+	for word in code_words:
+		row = vector.Vector(word, word_len)
+		if row.hamming_weight == desired_weight:
+			if row.support not in codewords_supports:
+				return row.support
 
+def gauss_codewords_supports_with_weight_in_range (irmc, M, eps):
 
-		#ssample = sorted(sample)
-		#print(ssample, "Len:", len(ssample))
+	code_words = [vec.value for vec in tools.iter_codewords(irmc)]
 
-		rmcg = rmc.gaussian_elimination(sample)
+	desired_weight_min = 2**(m - r) - 1
+	desired_weight_max = floor(float(2**(m - 2*r + 1)*(2**r - 1))*eps) - 1
 
-		rmcgr = rmcg.submatrix(sample, True)
+	print("Desired weight", desired_weight_min, desired_weight_max)
 
-		j = 0
-		for row in rmcgr:
-			
-			if row.hamming_weight >= desired_weight_min and row.hamming_weight <= desired_weight_max:
-				if rmcg[j].support not in codewords_supports:
-					codewords_supports.append(rmcg[j].support)
-				
+	codewords_supports = []
 
+	word_len = 2**m - 2**(m - r)
+
+	for word in code_words:
+		row = vector.Vector(word, word_len)
+		if row.hamming_weight >= desired_weight_min and row.hamming_weight <= desired_weight_max:
+			if row.support not in codewords_supports:
+				codewords_supports.append(row.support)
+				#print("Found", len(codewords_supports))
+				#print(row)
 				if len(codewords_supports) == M:
 					return codewords_supports
 
-			j+=1
-	print("[-]\tout of tries while searching for codewords_supports")
+
 
 def is_graph_ok(Gi):
 
@@ -157,6 +161,7 @@ def get_good_cliques(Gi):
 
 		for clique in cliques:
 			clique_len = len(clique)
+			print("Checking",clique)
 			if clique_len >= desired_clique_size:
 				if not clique_len % desired_clique_size:
 
@@ -236,11 +241,16 @@ random.shuffle(tmp_P)
 P = matrix.permutation(tmp_P)
 pubkey = M * rmc * P
 
-rmcgac = gauss_by_min_weighted_row(pubkey)
+print (pubkey)
 
+#rmcgac = gauss_by_min_weighted_row(pubkey)
+'''
 #print("Result:")
 print(rmcgac)
 
 result_cliques = inner_algo(rmcgac, 5)
 
 print(result_cliques)
+'''
+
+print(gauss_by_min_weighted_row(pubkey))
