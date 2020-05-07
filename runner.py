@@ -139,8 +139,8 @@ def is_graph_ok(Gi):
 
 def get_good_cliques(Gi):
 
-	desired_clique_size = 3
-	desired_number_of_cliques = 5
+	desired_clique_size = 2**(m - r)
+	desired_number_of_cliques = 2**r - 1
 
 	G = Gi.copy()
 
