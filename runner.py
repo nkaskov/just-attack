@@ -38,7 +38,7 @@ def gauss_by_min_weighted_row (irmc, codeword_support):
 			to_remove.append(j)
 		j+=1
 
-	rmcgar = rmcga.T.submatrix(to_remove, True).T.submatrix(codeword_support, True)
+	rmcgar = rmcga.submatrix(codeword_support, True).T.submatrix(to_remove, True).T
 
 	print()
 
