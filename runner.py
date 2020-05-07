@@ -63,6 +63,8 @@ def gauss_by_min_weighted_row (rmc):
 			j+=1
 	print("[-]\tout of tries while doing gauss_by_min_weighted_row")
 
+
+
 def gauss_codewords_supports_with_weight_in_range (rmc, M, eps):
 
 	k = rmc.nrows
@@ -227,8 +229,14 @@ def inner_algo(rmcgac, L):
 
 
 rmc = rm.generator(r,m)
+# Secret key generation
+M = matrix.nonsingular(rmc.nrows)
+tmp_P = [x for x in range(rmc.ncolumns)]
+random.shuffle(tmp_P)
+P = matrix.permutation(tmp_P)
+pubkey = M * rmc * P
 
-rmcgac = gauss_by_min_weighted_row(rmc)
+rmcgac = gauss_by_min_weighted_row(pubkey)
 
 #print("Result:")
 print(rmcgac)
