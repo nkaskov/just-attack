@@ -10,19 +10,21 @@ from networkx.algorithms.approximation import clique
 from blincodes.codes import rm
 from blincodes import matrix
 from blincodes import vector
+from blincodes.codes import tools
 
-r = 3
-m = 7
-
-rmc = rm.generator(r,m)
+r = 2
+m = 5
 
 
-k = rmc.nrows
-n = rmc.ncolumns
 
-print("[ ]\t", k, 'x', n)
+cij = [[0] *  (2**m - 2**(m - r))] * (2**m - 2**(m - r))
 
-def gauss_by_min_weighted_row ():
+def gauss_by_min_weighted_row (rmc):
+
+
+	k = rmc.nrows
+	n = rmc.ncolumns
+
 
 	max_tries = 250
 	desired_weight = 2**(m - r) - 1
@@ -63,14 +65,18 @@ def gauss_by_min_weighted_row ():
 
 def gauss_codewords_supports_with_weight_in_range (rmc, M, eps):
 
-	max_tries = 5000
+	k = rmc.nrows
+	n = rmc.ncolumns
+
+
+	max_tries = 50000
 	desired_weight_min = 2**(m - r) - 1
 	desired_weight_max = floor(float(2**(m - 2*r + 1)*(2**r - 1))*eps) - 1
 
 	codewords_supports = []
 
 	for i in range(0, max_tries):
-		print ("[ ]\ttry to find codewords_supports", i, "found", len(codewords_supports), "need", M)
+		#print ("[ ]\ttry to find codewords_supports", i, "found", len(codewords_supports), "need", M)
 		sample = random.sample(range(0, n), k)
 
 
@@ -88,6 +94,7 @@ def gauss_codewords_supports_with_weight_in_range (rmc, M, eps):
 			if row.hamming_weight >= desired_weight_min and row.hamming_weight <= desired_weight_max:
 				if rmcg[j].support not in codewords_supports:
 					codewords_supports.append(rmcg[j].support)
+				
 
 				if len(codewords_supports) == M:
 					return codewords_supports
@@ -95,34 +102,40 @@ def gauss_codewords_supports_with_weight_in_range (rmc, M, eps):
 			j+=1
 	print("[-]\tout of tries while searching for codewords_supports")
 
-def is_graph_ok(G):
+def is_graph_ok(Gi):
 
 	desired_clique_size = 2**(m - r)
 	desired_number_of_cliques = 2**r - 1
 
-	all_cliques = nx.enumerate_all_cliques(G)
-
-	print("trying")
-
-	all_elems = {}
-
-	for clique in all_cliques:
-		print(len(clique))
-		if len(clique) == desired_clique_size:
-			all_elems.update(clique)
+	G = Gi.copy()
 
 
-	print("probably ok")
+	good_cliques = 0
 
-	for i in range (0, 2**m - 2**(m - r)):
-		if not i in all_elems:
-			print("Not ok for", i)
+	while (True):
+
+		cliques = nx.find_cliques(G)
+
+		lol = True
+
+		for clique in cliques:
+			clique_len = len(clique)
+			print("Checking",clique)
+			if clique_len >= desired_clique_size:
+				if not clique_len % desired_clique_size:
+					good_cliques += clique_len / desired_clique_size
+					print("Found good cliques", good_cliques)
+					G.remove_nodes_from(clique)
+					lol= False
+					break
+
+		if lol:
+			print ("There are some bad cliques")
 			return False
-	print ("Ok")
-	return True
 
-
-        
+		if good_cliques == desired_number_of_cliques:
+			print("Graph consist only of good cliques")
+			return True
 
 def inner_algo(rmcgac, L):
 	
@@ -143,7 +156,10 @@ def inner_algo(rmcgac, L):
 		print("try it ", try_it)
 
 		M = L * 2**(2*r - 1)
-		c = ceil( L * (2**(m - r + 1) - 2**r) / (2**(m - r) - 1))
+
+		print("M", M, "\n")
+		#c = ceil( L * (2**(m - r + 1) - 2**r) / (2**(m - r) - 1))
+		c = 50
 
 		codewords_supports = gauss_codewords_supports_with_weight_in_range(rmcgac, M, eps)
 
@@ -151,14 +167,13 @@ def inner_algo(rmcgac, L):
 
 		for i in range(0, word_len):
 			for j in range(i + 1, word_len):
-				cij = 0
 				for word_support in codewords_supports:
 					if i in word_support and j in word_support:
-						cij += 1
-						if cij > c:
-							print("Add",i,",",j)
+						cij[i][j] += 1
+						if cij[i][j] > c:
+							#print("Add",i,",",j)
 							G.add_edge(i,j)
-							break
+
 
 
 		if is_graph_ok(G):
@@ -182,11 +197,11 @@ def inner_algo(rmcgac, L):
 
 
 
+rmc = rm.generator(r,m)
 
-
-rmcgac = gauss_by_min_weighted_row()
+rmcgac = gauss_by_min_weighted_row(rmc)
 
 #print("Result:")
 print(rmcgac)
 
-inner_algo(rmcgac, 100)
+inner_algo(rmcgac, 5)
