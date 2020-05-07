@@ -64,14 +64,9 @@ def gauss_by_min_weighted_row (rmc):
 	print("[-]\tout of tries while doing gauss_by_min_weighted_row")
 
 
-def gauss_codeword_support_with_weight(irmc, weight = 2**(m - r)):
-
-	
-
-	desired_weight = weight
+def gauss_codeword_support_with_weight(irmc, desired_weight = 2**(m - r)):
 
 	code_words = [vec for vec in tools.iter_codewords(irmc) if vec.hamming_weight == desired_weight]
-
 
 	print("Desired weight", desired_weight)
 
