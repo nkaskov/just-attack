@@ -19,49 +19,18 @@ m = 7
 
 cij = [[0] *  (2**m - 2**(m - r))] * (2**m - 2**(m - r))
 
-def gauss_by_min_weighted_row (rmc):
+def gauss_by_min_weighted_row (irmc, codeword_support):
+	
+	rmcga = irmc.gaussian_elimination(codeword_support)
 
+	print("rmcgs:")
 
-	k = rmc.nrows
-	n = rmc.ncolumns
+	print(rmcga)
 
+	rmcgac = rmcga[len(codeword_support):].submatrix(codeword_support, True)
 
-	max_tries = 250
-	desired_weight = 2**(m - r) - 1
+	return rmcgac
 
-	for i in range(0, max_tries):
-		print ("[ ]\ttry ", i)
-		sample = random.sample(range(0, n), k)
-
-		#ssample = sorted(sample)
-		#print(ssample, "Len:", len(ssample))
-
-		rmcg = rmc.gaussian_elimination(sample)
-
-		rmcgr = rmcg.submatrix(sample, True)
-
-		
-		j = 0
-		for row in rmcgr:
-			
-			if row.hamming_weight == desired_weight:
-
-				#print ("Row", j)
-
-				rmcgrow_ones = rmcg[j].support
-
-				#print ("Ones:", rmcgrow_ones)
-
-				rmcga = rmcg.gaussian_elimination(rmcgrow_ones)
-
-				#print (rmcga)
-
-				rmcgac = rmcga[len(rmcgrow_ones):].submatrix(rmcgrow_ones, True)
-
-				return rmcgac
-
-			j+=1
-	print("[-]\tout of tries while doing gauss_by_min_weighted_row")
 
 
 def gauss_codeword_support_with_weight(irmc, desired_weight = 2**(m - r)):
@@ -240,3 +209,5 @@ print(result_cliques)
 '''
 
 print(gauss_codeword_support_with_weight(pubkey))
+
+print(gauss_by_min_weighted_row(pubkey, gauss_codeword_support_with_weight(pubkey)))
