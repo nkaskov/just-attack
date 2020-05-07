@@ -64,49 +64,36 @@ def gauss_by_min_weighted_row (rmc):
 	print("[-]\tout of tries while doing gauss_by_min_weighted_row")
 
 
-def gauss_codewords_supports_with_weight(irmc, weight = 2**(m - r)):
+def gauss_codeword_support_with_weight(irmc, weight = 2**(m - r)):
 
-	code_words = [vec.value for vec in tools.iter_codewords(irmc)]
+	
 
 	desired_weight = weight
 
+	code_words = [vec for vec in tools.iter_codewords(irmc) if vec.hamming_weight == desired_weight]
+
+
 	print("Desired weight", desired_weight)
 
+	print(code_words)
 
-	codewords_supports = []
-
-	word_len = 2**m - 2**(m - r)
-
-	for word in code_words:
-		row = vector.Vector(word, word_len)
-		if row.hamming_weight == desired_weight:
-			if row.support not in codewords_supports:
-				return row.support
+	if len(code_words):
+		return code_words[0].support
 
 def gauss_codewords_supports_with_weight_in_range (irmc, M, eps):
 
-	code_words = [vec.value for vec in tools.iter_codewords(irmc)]
 
 	desired_weight_min = 2**(m - r) - 1
 	desired_weight_max = floor(float(2**(m - 2*r + 1)*(2**r - 1))*eps) - 1
 
 	print("Desired weight", desired_weight_min, desired_weight_max)
 
-	codewords_supports = []
+	code_words = [vec for vec in tools.iter_codewords(irmc) if vec.hamming_weight >= desired_weight_min and vec.hamming_weight <= desired_weight_max]
 
-	word_len = 2**m - 2**(m - r)
-
-	for word in code_words:
-		row = vector.Vector(word, word_len)
-		if row.hamming_weight >= desired_weight_min and row.hamming_weight <= desired_weight_max:
-			if row.support not in codewords_supports:
-				codewords_supports.append(row.support)
-				#print("Found", len(codewords_supports))
-				#print(row)
-				if len(codewords_supports) == M:
-					return codewords_supports
-
-
+	if len(code_words) >= M:
+		return [vec.support for vec in code_words]
+	else:
+		print("[-] Not enought words")
 
 def is_graph_ok(Gi):
 
@@ -253,4 +240,4 @@ result_cliques = inner_algo(rmcgac, 5)
 print(result_cliques)
 '''
 
-print(gauss_by_min_weighted_row(pubkey))
+print(gauss_codeword_support_with_weight(pubkey))
