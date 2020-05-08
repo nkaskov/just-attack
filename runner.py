@@ -17,24 +17,6 @@ m = 5
 
 already_choosen_codeword_supports = []
 
-
-def gauss_by_min_weighted_row (irmc, codeword_support):
-	
-	rmcga = irmc.gaussian_elimination(codeword_support)
-
-	to_remove = []
-
-	j = 0
-
-	for row in rmcga:
-		if len([value for value in row.support if value in codeword_support]):
-			to_remove.append(j)
-		j+=1
-
-	rmcgar = rmcga.T.submatrix(to_remove, True).T
-
-	return rmcgar
-
 def gauss_codeword_support_with_weight(irmc, desired_weight = 2**(m - r)):
 
 	print("[i]\tDesired weight of codeword:", desired_weight)
@@ -46,7 +28,6 @@ def gauss_codeword_support_with_weight(irmc, desired_weight = 2**(m - r)):
 			return vec.support
 
 	print("[-]\tBad weight recieved while searching of minimal codeword")
-
 
 def gauss_codewords_supports_with_weight_in_range (irmc, eps):
 
@@ -155,7 +136,6 @@ def inner_algo(rmcgac, L):
 	else:
 		print("[-]\tSomething very bad happened")
 		
-
 def get_b(pbk):
 
 	B = matrix.Matrix()
@@ -175,7 +155,7 @@ def get_b(pbk):
 
 		codeword_support = gauss_codeword_support_with_weight(pbk)
 
-		pbkc = gauss_by_min_weighted_row(pbk, codeword_support)
+		pbkc = tools.truncate(pbk, codeword_support)
 
 		fs_supports = inner_algo(pbkc, 100)
 
@@ -202,19 +182,38 @@ def get_b(pbk):
 			print("[+]\tB of desired size found on try", try_it)
 			return B
 
+def get_two_basis_code(B1, B2):
+	rows = []
 
+	for row1 in B1:
+		for row2 in B2:
+			rows.append(row1&row2)
 
+	return matrix.from_vectors([row for row in matrix.from_vectors(rows).gaussian_elimination() if len(row.support)])
 
+def get_random_pubkey():
 
+	rmc = rm.generator(r,m)
+	# Secret key generation
+	M = matrix.nonsingular(rmc.nrows)
+	tmp_P = [x for x in range(rmc.ncolumns)]
+	random.shuffle(tmp_P)
+	P = matrix.permutation(tmp_P)
+	pubkey = M * rmc * P
 
-rmc = rm.generator(r,m)
-# Secret key generation
-M = matrix.nonsingular(rmc.nrows)
-tmp_P = [x for x in range(rmc.ncolumns)]
-random.shuffle(tmp_P)
-P = matrix.permutation(tmp_P)
-pubkey = M * rmc * P
+	return pubkey
 
 #print (pubkey)
 
-b = get_b(pubkey)
+
+pubkey1 = get_random_pubkey()
+#b = get_b(pubkey)
+pubkey2 = get_random_pubkey()
+
+print("pubkey 1:\n", pubkey1)
+
+print("pubkey 2:\n", pubkey2)
+
+print("result:\n", get_two_basis_code(pubkey1, pubkey2))
+
+
