@@ -13,7 +13,7 @@ from blincodes import vector
 from blincodes.codes import tools
 
 r = 2
-m = 6
+m = 5
 
 
 
@@ -57,11 +57,11 @@ def gauss_codeword_support_with_weight(irmc, desired_weight = 2**(m - r)):
 	print("Bad weight")
 
 
-def gauss_codewords_supports_with_weight_in_range (irmc, M, eps):
+def gauss_codewords_supports_with_weight_in_range (irmc, eps):
 
 
-	desired_weight_min = 2**(m - r) - 1
-	desired_weight_max = floor(float(2**(m - 2*r + 1)*(2**r - 1))*eps) - 1
+	desired_weight_min = 2**(m - r)
+	desired_weight_max = floor(float(2**(m - 2*r + 1)*(2**r - 1))*eps)
 
 	print("Desired weight", desired_weight_min, desired_weight_max)
 
@@ -70,10 +70,7 @@ def gauss_codewords_supports_with_weight_in_range (irmc, M, eps):
 	for vec in tools.iter_codewords(irmc):
 		if vec.hamming_weight >= desired_weight_min and vec.hamming_weight <= desired_weight_max:
 			codewords_supports.append(vec.support)
-			print("Found", len(codewords_supports), "of", M)
-			'''if len(codewords_supports) == M:
-				return codewords_supports'''
-	print(len(codewords_supports))
+	print("Found", len(codewords_supports))
 
 	print("Bad weight")
 
@@ -158,7 +155,23 @@ def inner_algo(rmcgac, L):
 
 	eps = float(sqrt(1 - 1/(2**(m - 2*r + 1))))
 
+	codewords_supports = gauss_codewords_supports_with_weight_in_range(rmcgac, eps)
+
 	word_len = 2**m - 2**(m - r)
+
+	for i in range(0, word_len):
+		for j in range(i + 1, word_len):
+			for word_support in codewords_supports:
+				if i in word_support and j in word_support:
+					cij[i][j] += 1
+
+
+
+	for i in range(0, word_len):
+		for j in range(i + 1, word_len):
+			print(cij[i][j])
+		print()
+	exit()
 
 	G = nx.Graph()
 	G.add_nodes_from(range(0, word_len))
@@ -169,21 +182,15 @@ def inner_algo(rmcgac, L):
 
 		print("try it ", try_it)
 
-		M = L * 2**(2*r - 1)
+		#c = ceil( L * (2**(m - r + 1) - 2**r) / (2**(m - r) - 1))
 
-		print("M", M, "\n")
-		c = ceil( L * (2**(m - r + 1) - 2**r) / (2**(m - r) - 1))
-
-		codewords_supports = gauss_codewords_supports_with_weight_in_range(rmcgac, M, eps)
+		c= 100
 
 		for i in range(0, word_len):
 			for j in range(i + 1, word_len):
-				for word_support in codewords_supports:
-					if i in word_support and j in word_support:
-						cij[i][j] += 1
-						if cij[i][j] > c:
-							#print("Add",i,",",j)
-							G.add_edge(i,j)
+				if cij[i][j]*(try_it + 1) > c:
+					#print("Add",i,",",j)
+					G.add_edge(i,j)
 
 		good_cliques = get_good_cliques(G)
 
@@ -191,10 +198,9 @@ def inner_algo(rmcgac, L):
 			return good_cliques
 		else:
 			L += step_L
-
 			
-		try_it += 1			
-
+		try_it += 1
+		c+= 10
 
 def get_b(pbk):
 	B = []
@@ -204,22 +210,38 @@ def get_b(pbk):
 	for i in range (0, r - 1):
 		desired_b_size += binom(m, i)
 
+	print ("Desired size:", desired_b_size)
+
 
 	while (True):
 		codeword_support = gauss_codeword_support_with_weight(pbk)
 
 		pbkc = gauss_by_min_weighted_row(pbk, codeword_support)
 
-		fs = inner_algo(pbkc, 100)
+		fs_supports = inner_algo(pbkc, 100)
 
-		for f in fs:
-			f.extend(codeword_support)
+		print("Fs supports:", fs_supports)
 
+		print("Codeword supports:", codeword_support)		
 
-		B = tools.union(B, fs)
+		fs =[]
 
-		if len(B) == desired_b_size:
-			return B
+		for f_support in fs_supports:
+			tmp_support = f_support
+			tmp_support.extend(codeword_support)
+
+			fs.append(vector.from_support(2**m, tmp_support))
+
+		print("fs:", fs)
+
+		print("B:", B)
+
+		Bm = tools.union(matrix.Matrix(B), matrix.Matrix(fs))
+
+		print(Bm)
+
+		#if len(B) == desired_b_size:
+		return Bm
 
 
 
@@ -239,34 +261,4 @@ pubkey = M * rmc * P
 
 print (pubkey)
 
-codeword_support = gauss_codeword_support_with_weight(pubkey)
-
-print(codeword_support)
-
-rmcgac = gauss_by_min_weighted_row(pubkey, codeword_support)
-
-print(rmcgac)
-
-# Something bad is happening here
-# For (2, 5) parameters, we have only 87 words out of 800
-# Careful calculations of M needed
-supports = gauss_codewords_supports_with_weight_in_range(rmcgac, 50, 0.93)
-
-#print(supports)
-
-
-
-'''
-#print("Result:")
-print(rmcgac)
-
-result_cliques = inner_algo(rmcgac, 5)
-
-print(result_cliques)
-'''
-
-
-#codeword_support = gauss_codeword_support_with_weight(pubkey)
-#print(codeword_support)
-
-#print(gauss_by_min_weighted_row(pubkey, codeword_support))
+b = get_b(pubkey)
