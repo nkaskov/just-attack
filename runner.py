@@ -13,8 +13,8 @@ from blincodes import matrix
 from blincodes import vector
 from blincodes.codes import tools
 
-r = 1
-m = 4
+r = 2
+m = 5
 
 already_choosen_codeword_supports = []
 
@@ -39,12 +39,13 @@ def print_log(text, mode = 'info'):
 
 def gauss_codeword_support_with_weight(irmc, desired_weight = 2**(m - r)):
 
-	print("[i]\tDesired weight of codeword:", desired_weight)
+	#print("[i]\tDesired weight of codeword:", desired_weight)
 
 	for vec in tools.iter_codewords(irmc):
 		if vec.hamming_weight == desired_weight and vec.support not in already_choosen_codeword_supports:
 			already_choosen_codeword_supports.append(vec.support)
-			print("[i]\tchoosen codeword:", vec.support)
+			#print("[i]\tchoosen codeword:", vec.support)
+			print("[+]\tFound codeword with weight", vec.hamming_weight)
 			return vec.support
 
 	print("[-]\tBad weight recieved while searching of minimal codeword")
@@ -55,13 +56,15 @@ def gauss_codewords_supports_with_weight_in_range (irmc, eps):
 	desired_weight_min = 2**(m - r)
 	desired_weight_max = floor(float(2**(m - 2*r + 1)*(2**r - 1))*eps)
 
-	print("[i]\tDesired weight range:", desired_weight_min, desired_weight_max)
+	#print("[i]\tDesired weight range:", desired_weight_min, desired_weight_max)
 
 	codewords_supports = []
 
 	for vec in tools.iter_codewords(irmc):
 		if vec.hamming_weight >= desired_weight_min and vec.hamming_weight <= desired_weight_max:
 			codewords_supports.append(vec.support)
+
+	print("[+]\tFound", len(codewords_supports), "codewords supports in weight range", desired_weight_min, ":", desired_weight_max)
 
 	return codewords_supports
 
@@ -83,7 +86,7 @@ def get_good_cliques(Gi):
 
 		for clique in cliques:
 			clique_len = len(clique)
-			print("[i]\tChecking",clique)
+			#print("[i]\tChecking",clique)
 			if clique_len >= desired_clique_size:
 				if not clique_len % desired_clique_size:
 
@@ -110,8 +113,6 @@ def inner_algo(rmcgac, L):
 	eps = float(sqrt(1 - 1/(2**(m - 2*r + 1))))
 
 	codewords_supports = gauss_codewords_supports_with_weight_in_range(rmcgac, eps)
-
-	print("[i]\tFound", len(codewords_supports), "codewords supports in range")
 
 	word_len = 2**m 
 
@@ -166,7 +167,7 @@ def get_b(pbk):
 	for i in range (0, r):
 		desired_b_size += binom(m, i)
 
-	print ("[i]\tDesired B size:", desired_b_size)
+	#print ("[i]\tDesired B size:", desired_b_size)
 
 	try_it = 0
 
@@ -180,9 +181,9 @@ def get_b(pbk):
 
 		fs_supports = inner_algo(pbkc, 100)
 
-		print("[i]\tFs supports:", fs_supports)
+		#print("[i]\tFs supports:", fs_supports)
 
-		print("[i]\tCodeword supports:", codeword_support)		
+		#print("[i]\tCodeword supports:", codeword_support)
 
 		fs =[]
 
@@ -196,11 +197,11 @@ def get_b(pbk):
 
 		B = tools.union(B, matrix.from_vectors(fs))
 
-		print("[i]\tB with fs vectors:")
-		print(B)
+		#print("[i]\tB with fs vectors:")
+		#print(B)
 
 		if B.nrows == desired_b_size:
-			print("[+]\tB of desired size found on try", try_it)
+			print("[+]\tBasis B of desired size found on try", try_it)
 			return B
 
 def mult(B1, B2):
@@ -235,7 +236,7 @@ def solve_smth(gpub):
 def build_a(gpub):
 	a = solve_smth(gpub)
 
-	print("[i]\tvector a:", a)
+	#print("[i]\tvector a:", a)
 
 	removing_num = 0
 
@@ -256,39 +257,81 @@ def get_perm(gpub):
 
 	agpub = build_a(gpub)*gpub
 
-	print("[i]\tAGpub:")
-	print(agpub)
+	#print("[i]\tAGpub:")
+	#print(agpub)
 
 	return matrix.permutation([row.value for row in agpub.T.submatrix([0], True)])
-'''
 
 
-r = int(input("Enter r parameter:"))
-m = int(input("Enter m parameter:"))
+def xgcd(a, b):
+	#from Wiki
+    """return (g, x, y) such that a*x + b*y = g = gcd(a, b)"""
+    x0, x1, y0, y1 = 0, 1, 1, 0
+    while a != 0:
+        (q, a), b = divmod(b, a), a
+        y0, y1 = y1, y0 - q * y1
+        x0, x1 = x1, x0 - q * x1
+    return b, x0, y0
 
-M, pubkey, P = get_random_pubkey()
 
-A_inversed, perm = get_inversed_a_and_perm(pubkey)
+def inner_step(gpub, x, y):
+	q = (-y)/x + 1
+	s = x - (-y)%x
 
-print("A inversed:\n", A_inversed)
+	rm_s = gpub
 
-print("Perm:\n", perm)
+	for i in range(0,s - 1):
+		rm_s = mult(rm_s, gpub)
 
-print("Check:", A_inversed * rm.generator(r,m) * perm)
+	rm_qr = gpub
 
-print ("Gpub:", pubkey)
-'''
+	for i in range(0,q - 1):
+		rm_qr = mult(rm_s, gpub)
 
+	rm_qr = rm_qr.orthogonal
+
+	rm_dm = rm_qr
+
+	for i in range(0, x - 1):
+		rm_dm = mult(rm_dm, rm_qr)
+
+	rm_dm = mult(rm_dm, rm_s)
+
+	return rm_dm
+
+
+def step1(gpub):
+	g, x, y = xgcd(m - 1, r)
+
+	if x == 0 and y == 1:
+		return gpub
+	elif x > 0 and y < 0:
+		return inner_step(gpub, x, y)
+	elif x < 0 and y > 0:
+		return inner_step(gpub, 1 - x, -y).orthogonal
+	else:
+		print("[-]\tBad x y")
 
 
 def perform_attack(gpub):
-
-
-	M = matrix.Matrix()
 	
-	P = matrix.Matrix()
+	rmdm = step1(gpub)
 
-	return M, P
+	basis = get_b(rmdm)
+
+	rm1m = get_two_basis_code (rmdm, basis)
+
+	perm = get_perm(rm1m)
+
+	permuted_rm = rm.generator(r,m) * perm
+
+	print("Permuted:\n", permuted_rm)
+
+	#M = matrix.Matrix()
+	
+	#P = matrix.Matrix()
+
+	#return M, P
 
 def check_attack(pubkey, M1, P1):
 
@@ -366,6 +409,14 @@ def GUI(M = matrix.Matrix(), pubkey = matrix.Matrix(), P = matrix.Matrix(),
 
 	GUI(M, pubkey, P, M1, P1, key_generated, attack_performed)
 
-
+'''
 print_header()
-GUI()
+GUI()'''
+
+
+
+M, pubkey, P = pubkey_gen()
+
+print ("Pub key:", pubkey)
+
+perform_attack(pubkey)
