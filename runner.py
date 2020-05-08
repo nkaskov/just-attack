@@ -205,7 +205,7 @@ def get_random_pubkey():
 	P = matrix.permutation(tmp_P)
 	pubkey = M * rmc * P
 
-	return M, pubkey, P, rmc
+	return M, pubkey, P
 
 def solve_smth(gpub):
 	onev = vector.from_support_supplement(2**m)
@@ -244,21 +244,15 @@ def get_inversed_a_and_perm(gpub):
 
 
 
-M, pubkey, P, privkey = get_random_pubkey()
-#b = get_b(pubkey)
-#pubkey2 = get_random_pubkey()
-
-#print("pubkey 1:\n", pubkey1)
-
-#print("pubkey 2:\n", pubkey2)
-
-#print("result:\n", mult(pubkey1, pubkey2))
-
-print (pubkey)
+M, pubkey, P = get_random_pubkey()
 
 A_inversed, perm = get_inversed_a_and_perm(pubkey)
 
 print("A inversed:\n", A_inversed)
 
 print("Perm:\n", perm)
+
+print("Check:", A_inversed * rm.generator(r,m) * perm)
+
+print ("Gpub:", pubkey)
 
