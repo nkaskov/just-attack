@@ -13,7 +13,7 @@ from blincodes import vector
 from blincodes.codes import tools
 
 r = 2
-m = 5
+m = 7
 
 already_choosen_codeword_supports = []
 
@@ -163,6 +163,7 @@ def inner_algo(rmcgac, L):
 		
 
 def get_b(pbk):
+
 	B = matrix.Matrix()
 
 	desired_b_size = 0
@@ -172,8 +173,12 @@ def get_b(pbk):
 
 	print ("[i]\tDesired B size:", desired_b_size)
 
+	try_it = 0
 
 	while (True):
+
+		try_it+=1
+
 		codeword_support = gauss_codeword_support_with_weight(pbk)
 
 		pbkc = gauss_by_min_weighted_row(pbk, codeword_support)
@@ -199,11 +204,13 @@ def get_b(pbk):
 
 		B = tools.union(B, matrix.from_vectors(fs))
 
-		print("[i]\tB modified:")
+		print("[i]\tB with fs vectors:")
 		print(B)
 
 		if B.nrows == desired_b_size:
+			print("[+]\tB of desired size found on try", try_it)
 			return B
+
 
 
 
