@@ -16,8 +16,6 @@ from blincodes.codes import tools
 r = 2
 m = 6
 
-already_choosen_codeword_supports = []
-
 
 
 def print_log(text, mode = 'info'):
@@ -37,7 +35,8 @@ def print_log(text, mode = 'info'):
 
 	print(text)
 
-def gauss_codeword_support_with_weight(irmc, desired_weight = 2**(m - r)):
+def gauss_codeword_support_with_weight(irmc, already_choosen_codeword_supports = []):
+	desired_weight = 2**(m - r)
 
 	#print("[i]\tDesired weight of codeword:", desired_weight)
 
@@ -160,6 +159,8 @@ def get_b(pbk):
 	B = matrix.Matrix()
 
 	desired_b_size = 0
+	
+	already_choosen_codeword_supports = []
 
 	for i in range (0, r):
 		desired_b_size += int(binom(m, i))
@@ -172,7 +173,9 @@ def get_b(pbk):
 
 		try_it+=1
 
-		codeword_support = gauss_codeword_support_with_weight(pbk)
+		codeword_support = gauss_codeword_support_with_weight(pbk, already_choosen_codeword_supports)
+
+		already_choosen_codeword_supports.append(codeword_support)
 
 		pbkc = tools.truncate(pbk, codeword_support)
 
@@ -317,6 +320,13 @@ def inner_step(gpub, x, y):
 
 		rm_qr = rm_qr.orthogonal
 
+		rm_dm = rm_qr
+
+		for i in range(0, x - 1):
+			rm_dm = mult(rm_dm, rm_qr)
+
+		return rm_dm
+
 
 def step1(gpub):
 	g, x, y = xgcd(m - 1, r)
@@ -375,14 +385,14 @@ def check_attack(gpub, M1, P1):
 
 	pubkey_to_check *= P1
 
-	print ("Found pubkey:\n", pubkey_to_check)
+	print ("[i]\tPubkey, based on found M\' and P\' :\n", pubkey_to_check)
 
 	if pubkey_to_check == gpub:
 
-		print_log("Success!", mode='good')
+		print_log("Attack succeeded!", mode='good')
 		return True
 	else:
-		print_log("Failure", mode='bad')
+		print_log("Attack failed :(", mode='bad')
 		return False
 	
 
@@ -395,7 +405,7 @@ def print_header():
 def GUI(M = matrix.Matrix(), pubkey = matrix.Matrix(), P = matrix.Matrix(),
 		M1 = matrix.Matrix(), P1 = matrix.Matrix(), key_generated = False,	attack_performed = False):
 	print_log ('1. (Re)generate keys', mode='info')
-	print_log ('2. Perform attack on public key', mode='info')
+	print_log ('2. Perform attack on the generated public key', mode='info')
 	print_log ('3. Check attack result', mode='info')
 	print_log ('0. Exit', mode='info')
 
@@ -403,11 +413,13 @@ def GUI(M = matrix.Matrix(), pubkey = matrix.Matrix(), P = matrix.Matrix(),
 
 	if user_action == '1':
 		print_log ('Please enter desired r parameter:', mode='info')
+		global r 
 		r = int(input())
 		print_log ('Please enter desired m parameter:', mode='info')
+		global m 
 		m = int(input())
 
-		print_log ('Generation of pubkey is starting...', mode='good')
+		print_log ('Generation of pubkey started...', mode='good')
 
 		M, pubkey, P = pubkey_gen()
 
@@ -428,23 +440,34 @@ def GUI(M = matrix.Matrix(), pubkey = matrix.Matrix(), P = matrix.Matrix(),
 
 		GUI(M, pubkey, P, key_generated = True)
 
-
 	elif user_action == '2':
 		if not key_generated:
-			print_log ('Please generate keys before :)', mode='bad')
+			print_log ('To perform attack you first need to generate keys. Would you like to generate keys?', mode='bad')
 		else:
+
+			print_log ('Attack performing started...', mode='good')
 
 			M1, P1 = perform_attack(pubkey)
 
-			
+			print_log ('Attack performing finished', mode='good')
+
+
+			print_log ('There is found M\' matrix:', mode='info')
+
+			print(M)
+
+			print_log ('There is found permutation matrix P\':', mode='info')
+			print(P)
+
+			print_log ('')
 
 			GUI(M, pubkey, P, M1, P1, key_generated = True, attack_performed = True)
 
 	elif user_action == '3':
 		if not key_generated:
-			print_log ('Please generate keys before :)', mode='bad')
+			print_log ('To check the result you first need to generate keys and perform the attack. Would you like to generate keys?', mode='bad')
 		elif not attack_performed:
-			print_log ('Please perform attack before :)', mode='bad')
+			print_log ('To check the result you first need to perform the attack. Would you like to perform the attack?', mode='bad')
 		else:
 
 			check_attack(pubkey, M1, P1)
@@ -452,21 +475,12 @@ def GUI(M = matrix.Matrix(), pubkey = matrix.Matrix(), P = matrix.Matrix(),
 			GUI(M, pubkey, P, M1, P1, key_generated = True, attack_performed = True)
 	else:
 		print_log ('Bye!', mode='info')
-		return
+		exit()
+		#return
 
 
 	GUI(M, pubkey, P, M1, P1, key_generated, attack_performed)
 
-'''
+
 print_header()
-GUI()'''
-
-
-
-M, pubkey, P = pubkey_gen()
-
-print ("Pub key:", pubkey)
-
-M1, P1 = perform_attack(pubkey)
-
-check_attack (pubkey, M1, P1)
+GUI()
