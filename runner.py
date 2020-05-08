@@ -17,7 +17,9 @@ m = 5
 
 
 
-cij = [[0] *  (2**m - 2**(m - r))] * (2**m - 2**(m - r))
+#cij = [[0] *  (2**m - 2**(m - r))] * (2**m - 2**(m - r))
+
+cij = [[0 for x in range (2**m - 2**(m - r))] for y in range (2**m - 2**(m - r))] 
 
 def gauss_by_min_weighted_row (irmc, codeword_support):
 	
@@ -159,19 +161,18 @@ def inner_algo(rmcgac, L):
 
 	word_len = 2**m - 2**(m - r)
 
+	print("Supports len:", len(codewords_supports))
+
 	for i in range(0, word_len):
 		for j in range(i + 1, word_len):
+			word_num = 0
+			#cij[i][j] = 0
 			for word_support in codewords_supports:
-				if i in word_support and j in word_support:
+				if (i in word_support) and (j in word_support):
+					#print("i",i,"j",j,"support",word_support, "word number:", word_num)
 					cij[i][j] += 1
 
-
-
-	for i in range(0, word_len):
-		for j in range(i + 1, word_len):
-			print(cij[i][j])
-		print()
-	exit()
+				word_num += 1
 
 	G = nx.Graph()
 	G.add_nodes_from(range(0, word_len))
@@ -184,7 +185,7 @@ def inner_algo(rmcgac, L):
 
 		#c = ceil( L * (2**(m - r + 1) - 2**r) / (2**(m - r) - 1))
 
-		c= 100
+		c= 10
 
 		for i in range(0, word_len):
 			for j in range(i + 1, word_len):
