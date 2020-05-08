@@ -14,7 +14,7 @@ from blincodes import vector
 from blincodes.codes import tools
 
 r = 2
-m = 5
+m = 6
 
 already_choosen_codeword_supports = []
 
@@ -105,11 +105,8 @@ def get_good_cliques(Gi):
 			print("[+]\tGraph consist only of good cliques")
 			return result_cliques
 
-def inner_algo(rmcgac, L):
+def inner_algo(rmcgac):
 	
-
-	step_L = 1
-
 	eps = float(sqrt(1 - 1/(2**(m - 2*r + 1))))
 
 	codewords_supports = gauss_codewords_supports_with_weight_in_range(rmcgac, eps)
@@ -179,7 +176,7 @@ def get_b(pbk):
 
 		pbkc = tools.truncate(pbk, codeword_support)
 
-		fs_supports = inner_algo(pbkc, 100)
+		fs_supports = inner_algo(pbkc)
 
 		#print("[i]\tFs supports:", fs_supports)
 
@@ -275,7 +272,7 @@ def xgcd(a, b):
 
 
 def inner_step(gpub, x, y):
-	q = (-y)/x + 1
+	q = (-y)//x + 1
 	s = x - (-y)%x
 
 	rm_s = gpub
