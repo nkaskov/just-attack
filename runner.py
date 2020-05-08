@@ -22,7 +22,7 @@ already_choosen_codeword_supports = []
 
 def print_log(text, mode = 'info'):
 
-	print(time.asctime( time.gmtime(time.time())), end='\t')
+	#print(time.asctime( time.gmtime(time.time())), end='\t')
 
 	if mode == 'info':
 		print('[i]', end ='\t')
@@ -162,7 +162,7 @@ def get_b(pbk):
 	desired_b_size = 0
 
 	for i in range (0, r):
-		desired_b_size += binom(m, i)
+		desired_b_size += int(binom(m, i))
 
 	#print ("[i]\tDesired B size:", desired_b_size)
 
@@ -197,9 +197,12 @@ def get_b(pbk):
 		#print("[i]\tB with fs vectors:")
 		#print(B)
 
+
 		if B.nrows == desired_b_size:
 			print("[+]\tBasis B of desired size found on try", try_it)
 			return B
+
+		print("[+]\tFound", B.nrows,"of", desired_b_size,"basis B vectors on try", try_it)
 
 def mult(B1, B2):
 	rows = []
@@ -233,7 +236,7 @@ def solve_smth(gpub):
 def build_a(gpub):
 	a = solve_smth(gpub)
 
-	#print("[i]\tvector a:", a)
+	print("[i]\tvector a:", a)
 
 	removing_num = 0
 
@@ -254,7 +257,7 @@ def get_perm(gpub):
 
 	agpub = build_a(gpub)*gpub
 
-	#print("[i]\tAGpub:")
+	print("[i]\tAGpub:")
 	#print(agpub)
 
 	return matrix.permutation([row.value for row in agpub.T.submatrix([0], True)])
@@ -272,40 +275,60 @@ def xgcd(a, b):
 
 
 def inner_step(gpub, x, y):
-	q = (-y)//x + 1
-	s = x - (-y)%x
+	q = ceil((-y)/x)
+	s = q*x + y
 
-	rm_s = gpub
+	print("q", q, "s", s)
 
-	for i in range(0,s - 1):
-		rm_s = mult(rm_s, gpub)
+	if s!= 0 and q != 0:
 
-	rm_qr = gpub
+		rm_s = gpub
 
-	for i in range(0,q - 1):
-		rm_qr = mult(rm_s, gpub)
+		for i in range(0,s - 1):
+			rm_s = mult(rm_s, gpub)
 
-	rm_qr = rm_qr.orthogonal
+		rm_qr = gpub
 
-	rm_dm = rm_qr
+		for i in range(0,q - 1):
+			rm_qr = mult(rm_qr, gpub)
 
-	for i in range(0, x - 1):
-		rm_dm = mult(rm_dm, rm_qr)
+		rm_qr = rm_qr.orthogonal
 
-	rm_dm = mult(rm_dm, rm_s)
+		rm_dm = rm_qr
 
-	return rm_dm
+		for i in range(0, x - 1):
+			rm_dm = mult(rm_dm, rm_qr)
+
+		rm_dm = mult(rm_dm, rm_s)
+
+		return rm_dm
+
+	elif s != 0:
+
+		rm_s = gpub
+
+		for i in range(0,s - 1):
+			rm_s = mult(rm_s, gpub)
+	else:
+		rm_qr = gpub
+
+		for i in range(0,q - 1):
+			rm_qr = mult(rm_qr, gpub)
+
+		rm_qr = rm_qr.orthogonal
 
 
 def step1(gpub):
 	g, x, y = xgcd(m - 1, r)
 
+	print("x", x, "y", y)
+
 	if x == 0 and y == 1:
-		return gpub
+		return g, gpub
 	elif x > 0 and y < 0:
-		return inner_step(gpub, x, y)
+		return g, inner_step(gpub, x, y)
 	elif x < 0 and y > 0:
-		return inner_step(gpub, 1 - x, -y).orthogonal
+		return g, inner_step(gpub, 1 - x, -y).orthogonal
 	else:
 		print("[-]\tBad x y")
 
@@ -323,17 +346,22 @@ def step5(gpub, permuted_rm):
 
 def perform_attack(gpub):
 	
-	rmdm = step1(gpub)
+	g, rmdm = step1(gpub)
 
-	basis = get_b(rmdm)
+	if g != 1:
+		basis = get_b(rmdm)
 
-	rm1m = get_two_basis_code (rmdm, basis)
+		rmdm = get_two_basis_code (rmdm, basis)
 
-	P1 = get_perm(rm1m)
+	print("RMDM", rmdm)
+
+	P1 = get_perm(rmdm)
+
+	print("Permutation:\n", P1)
 
 	permuted_rm = rm.generator(r,m) * P1
 
-	#print("Permuted:\n", permuted_rm)
+	print("Permuted:\n", permuted_rm)
 
 	M1 = step5(gpub, permuted_rm)
 
