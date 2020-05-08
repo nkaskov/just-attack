@@ -13,8 +13,9 @@ from blincodes import vector
 from blincodes.codes import tools
 
 r = 2
-m = 7
+m = 5
 
+already_choosen_codeword_supports = []
 
 
 def gauss_by_min_weighted_row (irmc, codeword_support):
@@ -43,7 +44,9 @@ def gauss_codeword_support_with_weight(irmc, desired_weight = 2**(m - r)):
 	print("[i]\tDesired weight of codeword:", desired_weight)
 
 	for vec in tools.iter_codewords(irmc):
-		if vec.hamming_weight == desired_weight:
+		if vec.hamming_weight == desired_weight and vec.support not in already_choosen_codeword_supports:
+			already_choosen_codeword_supports.append(vec.support)
+			print("[i]\tchoosen codeword:", vec.support)
 			return vec.support
 
 	print("Bad weight")
@@ -160,11 +163,11 @@ def inner_algo(rmcgac, L):
 		
 
 def get_b(pbk):
-	B = []
+	B = matrix.Matrix()
 
 	desired_b_size = 0
 
-	for i in range (0, r - 1):
+	for i in range (0, r):
 		desired_b_size += binom(m, i)
 
 	print ("[i]\tDesired B size:", desired_b_size)
@@ -191,14 +194,16 @@ def get_b(pbk):
 
 		print("[i]\tfs vectors after extending:", fs)
 
-		print("[i]\tB:", B)
+		print("[i]\tB:")
+		print(B)
 
-		Bm = tools.union(matrix.Matrix(B), matrix.Matrix(fs))
+		Bm = tools.union(B, matrix.from_vectors(fs))
 
-		print("[i]\tBm:", Bm)
+		print("[i]\tBm:")
+		print(Bm)
 
-		#if len(B) == desired_b_size:
-		return Bm
+		if B.nrows == desired_b_size:
+			return Bm
 
 
 
@@ -212,6 +217,6 @@ random.shuffle(tmp_P)
 P = matrix.permutation(tmp_P)
 pubkey = M * rmc * P
 
-print (pubkey)
+#print (pubkey)
 
 b = get_b(pubkey)
