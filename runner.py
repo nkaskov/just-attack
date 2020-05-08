@@ -332,13 +332,13 @@ def perform_attack(gpub):
 
 	rm1m = get_two_basis_code (rmdm, basis)
 
-	perm = get_perm(rm1m)
+	P1 = get_perm(rm1m)
 
-	P1 = rm.generator(r,m) * perm
+	permuted_rm = rm.generator(r,m) * P1
 
 	#print("Permuted:\n", permuted_rm)
 
-	M1 = step5(gpub, P1)
+	M1 = step5(gpub, permuted_rm)
 
 	return M1, P1
 
@@ -346,7 +346,9 @@ def check_attack(gpub, M1, P1):
 
 	print ("Pubkey:\n", gpub)
 
-	pubkey_to_check = M1*rm.generator(r,m)*P1
+	pubkey_to_check = M1*rm.generator(r,m)
+
+	pubkey_to_check *= P1
 
 	print ("Found pubkey:\n", pubkey_to_check)
 
