@@ -15,11 +15,7 @@ from blincodes.codes import tools
 r = 2
 m = 5
 
-
-
-#cij = [[0] *  (2**m - 2**(m - r))] * (2**m - 2**(m - r))
-
-cij = [[0 for x in range (2**m - 2**(m - r))] for y in range (2**m - 2**(m - r))] 
+cij = [[0 for x in range (2**m - 2**(m - r))] for y in range (2**m - 2**(m - r))]
 
 def gauss_by_min_weighted_row (irmc, codeword_support):
 	
@@ -28,8 +24,6 @@ def gauss_by_min_weighted_row (irmc, codeword_support):
 	print("rmcga:")
 
 	print(rmcga)
-
-	#rmcgac = rmcga[len(codeword_support):].submatrix(codeword_support, True)
 
 	to_remove = []
 
@@ -42,11 +36,7 @@ def gauss_by_min_weighted_row (irmc, codeword_support):
 
 	rmcgar = rmcga.submatrix(codeword_support, True).T.submatrix(to_remove, True).T
 
-	print()
-
 	return rmcgar
-
-
 
 def gauss_codeword_support_with_weight(irmc, desired_weight = 2**(m - r)):
 
@@ -77,41 +67,6 @@ def gauss_codewords_supports_with_weight_in_range (irmc, eps):
 	print("Bad weight")
 
 	return codewords_supports
-
-def is_graph_ok(Gi):
-
-	desired_clique_size = 2**(m - r)
-	desired_number_of_cliques = 2**r - 1
-
-	G = Gi.copy()
-
-
-	good_cliques = 0
-
-	while (True):
-
-		cliques = nx.find_cliques(G)
-
-		lol = True
-
-		for clique in cliques:
-			clique_len = len(clique)
-			#print("Checking",clique)
-			if clique_len >= desired_clique_size:
-				if not clique_len % desired_clique_size:
-					good_cliques += clique_len / desired_clique_size
-					#print("Found good cliques", good_cliques)
-					G.remove_nodes_from(clique)
-					lol= False
-					break
-
-		if lol:
-			print ("[ ]\tThere are some bad cliques")
-			return False
-
-		if good_cliques == desired_number_of_cliques:
-			print("[+]\tGraph consist only of good cliques")
-			return True
 
 def get_good_cliques(Gi):
 
@@ -243,10 +198,6 @@ def get_b(pbk):
 
 		#if len(B) == desired_b_size:
 		return Bm
-
-
-
-
 
 
 
