@@ -13,7 +13,7 @@ from blincodes import vector
 from blincodes.codes import tools
 
 r = 2
-m = 5
+m = 7
 
 cij = [[0 for x in range (2**m - 2**(m - r))] for y in range (2**m - 2**(m - r))]
 
@@ -129,6 +129,16 @@ def inner_algo(rmcgac, L):
 
 				word_num += 1
 
+	cij_values = set()
+
+	for i in range(0, word_len):
+		for j in range(i + 1, word_len):
+			cij_values.add(cij[i][j])
+
+	print("cij values:", cij_values)
+	
+	c = (min(cij_values) + max(cij_values))/2
+
 	G = nx.Graph()
 	G.add_nodes_from(range(0, word_len))
 
@@ -139,8 +149,6 @@ def inner_algo(rmcgac, L):
 		print("try it ", try_it)
 
 		#c = ceil( L * (2**(m - r + 1) - 2**r) / (2**(m - r) - 1))
-
-		c= 10
 
 		for i in range(0, word_len):
 			for j in range(i + 1, word_len):
