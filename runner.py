@@ -312,6 +312,17 @@ def step1(gpub):
 	else:
 		print("[-]\tBad x y")
 
+def step5(gpub, permuted_rm):
+	
+	rows = []
+
+	for i in range(0, gpub.nrows):
+
+		rows.append(permuted_rm.T.solve(gpub[i])[1])
+
+	print("Rows:", rows)
+	return matrix.from_vectors(rows)
+	#return matrix.Matrix()
 
 def perform_attack(gpub):
 	
@@ -323,20 +334,30 @@ def perform_attack(gpub):
 
 	perm = get_perm(rm1m)
 
-	permuted_rm = rm.generator(r,m) * perm
+	P1 = rm.generator(r,m) * perm
 
-	print("Permuted:\n", permuted_rm)
+	#print("Permuted:\n", permuted_rm)
 
-	#M = matrix.Matrix()
+	M1 = step5(gpub, P1)
+
+	return M1, P1
+
+def check_attack(gpub, M1, P1):
+
+	print ("Pubkey:\n", gpub)
+
+	pubkey_to_check = M1*rm.generator(r,m)*P1
+
+	print ("Found pubkey:\n", pubkey_to_check)
+
+	if pubkey_to_check == gpub:
+
+		print_log("Success!", mode='good')
+		return True
+	else:
+		print_log("Failure", mode='bad')
+		return False
 	
-	#P = matrix.Matrix()
-
-	#return M, P
-
-def check_attack(pubkey, M1, P1):
-
-	print_log("Success!", mode='good')
-	return True
 
 
 def print_header():
@@ -419,4 +440,6 @@ M, pubkey, P = pubkey_gen()
 
 print ("Pub key:", pubkey)
 
-perform_attack(pubkey)
+M1, P1 = perform_attack(pubkey)
+
+check_attack (pubkey, M1, P1)
