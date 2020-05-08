@@ -12,8 +12,8 @@ from blincodes import matrix
 from blincodes import vector
 from blincodes.codes import tools
 
-r = 2
-m = 5
+r = 1
+m = 4
 
 already_choosen_codeword_supports = []
 
@@ -42,7 +42,6 @@ def gauss_codewords_supports_with_weight_in_range (irmc, eps):
 	for vec in tools.iter_codewords(irmc):
 		if vec.hamming_weight >= desired_weight_min and vec.hamming_weight <= desired_weight_max:
 			codewords_supports.append(vec.support)
-	print("[i]\tFound", len(codewords_supports), "codewords supports in range")
 
 	return codewords_supports
 
@@ -91,6 +90,8 @@ def inner_algo(rmcgac, L):
 	eps = float(sqrt(1 - 1/(2**(m - 2*r + 1))))
 
 	codewords_supports = gauss_codewords_supports_with_weight_in_range(rmcgac, eps)
+
+	print("[i]\tFound", len(codewords_supports), "codewords supports in range")
 
 	word_len = 2**m 
 
@@ -191,10 +192,8 @@ def mult(B1, B2):
 
 	return matrix.from_vectors([row for row in matrix.from_vectors(rows).gaussian_elimination() if len(row.support)])
 
-
 def get_two_basis_code(B1, B2):
 	return mult(B1.orthogonal, B2).orthogonal
-
 
 def get_random_pubkey():
 
@@ -206,19 +205,57 @@ def get_random_pubkey():
 	P = matrix.permutation(tmp_P)
 	pubkey = M * rmc * P
 
-	return pubkey
+	return M, pubkey, P, rmc
 
-#print (pubkey)
+def solve_smth(gpub):
+	onev = vector.from_support_supplement(2**m)
+
+	return gpub.T.solve(onev)[1]
+
+def build_a(gpub):
+	a = solve_smth(gpub)
+
+	print("[i]\tvector a:", a)
+
+	removing_num = 0
+
+	if len(a.support):
+		removing_num = a.support[0]
+	else:
+		print("[-]\tBad vector a:", a)
 
 
-pubkey1 = get_random_pubkey()
+
+
+	A_rows = [a]
+
+	for i in range(0, m + 1):
+		if i != removing_num:
+			A_rows.append(a ^ vector.from_support(m + 1, [i]))
+
+	return matrix.from_vectors(A_rows)
+
+def get_perm_by_agpub(gpub):
+	agpub = build_a(gpub)*gpub
+
+	print("[i]\tAGpub:")
+	print(agpub)
+
+	return matrix.permutation([row.value for row in agpub.T.submatrix([0], True)])
+
+
+
+M, pubkey, P, privkey = get_random_pubkey()
 #b = get_b(pubkey)
-pubkey2 = get_random_pubkey()
+#pubkey2 = get_random_pubkey()
 
-print("pubkey 1:\n", pubkey1)
+#print("pubkey 1:\n", pubkey1)
 
-print("pubkey 2:\n", pubkey2)
+#print("pubkey 2:\n", pubkey2)
 
-print("result:\n", mult(pubkey1, pubkey2))
+#print("result:\n", mult(pubkey1, pubkey2))
 
+print (pubkey)
+
+print("Perm:", get_perm_by_agpub(pubkey))
 
