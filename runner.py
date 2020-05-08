@@ -13,7 +13,7 @@ from blincodes import vector
 from blincodes.codes import tools
 
 r = 2
-m = 7
+m = 5
 
 already_choosen_codeword_supports = []
 
@@ -21,10 +21,6 @@ already_choosen_codeword_supports = []
 def gauss_by_min_weighted_row (irmc, codeword_support):
 	
 	rmcga = irmc.gaussian_elimination(codeword_support)
-
-	print("rmcga:")
-
-	print(rmcga)
 
 	to_remove = []
 
@@ -49,7 +45,7 @@ def gauss_codeword_support_with_weight(irmc, desired_weight = 2**(m - r)):
 			print("[i]\tchoosen codeword:", vec.support)
 			return vec.support
 
-	print("Bad weight")
+	print("[-]\tBad weight recieved while searching of minimal codeword")
 
 
 def gauss_codewords_supports_with_weight_in_range (irmc, eps):
@@ -66,8 +62,6 @@ def gauss_codewords_supports_with_weight_in_range (irmc, eps):
 		if vec.hamming_weight >= desired_weight_min and vec.hamming_weight <= desired_weight_max:
 			codewords_supports.append(vec.support)
 	print("[i]\tFound", len(codewords_supports), "codewords supports in range")
-
-	print("Bad weight")
 
 	return codewords_supports
 
@@ -101,7 +95,7 @@ def get_good_cliques(Gi):
 					break
 
 		if lol:
-			print ("[-]\tThere are some bad cliques")
+			#print ("[-]\tThere are some bad cliques")
 			return []
 
 		if len(result_cliques) == desired_number_of_cliques:
@@ -142,7 +136,7 @@ def inner_algo(rmcgac, L):
 		for j in range(i + 1, word_len):
 			cij_values.add(cij[i][j])
 
-	print("[i]\tcij values:", cij_values)
+	#print("[i]\tcij values:", cij_values)
 
 	c = max(cij_values)
 
@@ -197,10 +191,7 @@ def get_b(pbk):
 
 			fs.append(vector.from_support(2**m, tmp_support))
 
-		print("[i]\tfs vectors after extending:", fs)
-
-		print("[i]\tB:")
-		print(B)
+		#print("[i]\tfs vectors after extending:", fs)
 
 		B = tools.union(B, matrix.from_vectors(fs))
 
