@@ -224,9 +224,6 @@ def build_a(gpub):
 	else:
 		print("[-]\tBad vector a:", a)
 
-
-
-
 	A_rows = [a]
 
 	for i in range(0, m + 1):
@@ -235,13 +232,15 @@ def build_a(gpub):
 
 	return matrix.from_vectors(A_rows)
 
-def get_perm_by_agpub(gpub):
-	agpub = build_a(gpub)*gpub
+def get_inversed_a_and_perm(gpub):
+	A = build_a(gpub)
+
+	agpub = A*gpub
 
 	print("[i]\tAGpub:")
 	print(agpub)
 
-	return matrix.permutation([row.value for row in agpub.T.submatrix([0], True)])
+	return A.inverse, matrix.permutation([row.value for row in agpub.T.submatrix([0], True)])
 
 
 
@@ -257,5 +256,9 @@ M, pubkey, P, privkey = get_random_pubkey()
 
 print (pubkey)
 
-print("Perm:", get_perm_by_agpub(pubkey))
+A_inversed, perm = get_inversed_a_and_perm(pubkey)
+
+print("A inversed:\n", A_inversed)
+
+print("Perm:\n", perm)
 
