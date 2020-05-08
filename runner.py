@@ -13,7 +13,7 @@ from blincodes import vector
 from blincodes.codes import tools
 
 r = 2
-m = 5
+m = 6
 
 
 
@@ -250,7 +250,7 @@ print(rmcgac)
 # Something bad is happening here
 # For (2, 5) parameters, we have only 87 words out of 800
 # Careful calculations of M needed
-supports = gauss_codewords_supports_with_weight_in_range(rmcgac, 800, 0.93)
+supports = gauss_codewords_supports_with_weight_in_range(rmcgac, 50, 0.93)
 
 #print(supports)
 
