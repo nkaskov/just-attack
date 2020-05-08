@@ -2,6 +2,7 @@
 import random
 from scipy.special import binom
 from math import *
+import time
 
 import networkx as nx
 from networkx.algorithms.approximation import clique
@@ -16,6 +17,25 @@ r = 1
 m = 4
 
 already_choosen_codeword_supports = []
+
+
+
+def print_log(text, mode = 'info'):
+
+	print(time.asctime( time.gmtime(time.time())), end='\t')
+
+	if mode == 'info':
+		print('[i]', end ='\t')
+	elif mode == 'good':
+		print('[+]', end ='\t')
+	elif mode == 'bad':
+		print('[-]', end ='\t')
+	else:
+		print('!\tBad print log mode')
+		return
+
+
+	print(text)
 
 def gauss_codeword_support_with_weight(irmc, desired_weight = 2**(m - r)):
 
@@ -195,7 +215,7 @@ def mult(B1, B2):
 def get_two_basis_code(B1, B2):
 	return mult(B1.orthogonal, B2).orthogonal
 
-def get_random_pubkey():
+def pubkey_gen():
 
 	rmc = rm.generator(r,m)
 	# Secret key generation
@@ -232,17 +252,19 @@ def build_a(gpub):
 
 	return matrix.from_vectors(A_rows)
 
-def get_inversed_a_and_perm(gpub):
-	A = build_a(gpub)
+def get_perm(gpub):
 
-	agpub = A*gpub
+	agpub = build_a(gpub)*gpub
 
 	print("[i]\tAGpub:")
 	print(agpub)
 
-	return A.inverse, matrix.permutation([row.value for row in agpub.T.submatrix([0], True)])
+	return matrix.permutation([row.value for row in agpub.T.submatrix([0], True)])
+'''
 
 
+r = int(input("Enter r parameter:"))
+m = int(input("Enter m parameter:"))
 
 M, pubkey, P = get_random_pubkey()
 
@@ -255,4 +277,95 @@ print("Perm:\n", perm)
 print("Check:", A_inversed * rm.generator(r,m) * perm)
 
 print ("Gpub:", pubkey)
+'''
 
+
+
+def perform_attack(gpub):
+
+
+	M = matrix.Matrix()
+	
+	P = matrix.Matrix()
+
+	return M, P
+
+def check_attack(pubkey, M1, P1):
+
+	print_log("Success!", mode='good')
+	return True
+
+
+def print_header():
+	print_log ('Welcome to Just!Attack 1.0', mode='info')
+	print_log ('Please choose your next action:', mode='info')
+
+
+def GUI(M = matrix.Matrix(), pubkey = matrix.Matrix(), P = matrix.Matrix(),
+		M1 = matrix.Matrix(), P1 = matrix.Matrix(), key_generated = False,	attack_performed = False):
+	print_log ('1. (Re)generate keys', mode='info')
+	print_log ('2. Perform attack on public key', mode='info')
+	print_log ('3. Check attack result', mode='info')
+	print_log ('0. Exit', mode='info')
+
+	user_action = input()
+
+	if user_action == '1':
+		print_log ('Please enter desired r parameter:', mode='info')
+		r = int(input())
+		print_log ('Please enter desired m parameter:', mode='info')
+		m = int(input())
+
+		print_log ('Generation of pubkey is starting...', mode='good')
+
+		M, pubkey, P = pubkey_gen()
+
+		print_log ('Generation finished.', mode='good')
+
+		print_log ('There is your M matrix:', mode='info')
+
+		print(M)
+
+		print_log ('There is your pubkey:', mode='info')
+		print(pubkey)
+
+		print_log ('There is your permutation matrix:', mode='info')
+		print(P)
+
+		key_generated = True
+
+
+		GUI(M, pubkey, P, key_generated = True)
+
+
+	elif user_action == '2':
+		if not key_generated:
+			print_log ('Please generate keys before :)', mode='bad')
+		else:
+
+			M1, P1 = perform_attack(pubkey)
+
+			
+
+			GUI(M, pubkey, P, M1, P1, key_generated = True, attack_performed = True)
+
+	elif user_action == '3':
+		if not key_generated:
+			print_log ('Please generate keys before :)', mode='bad')
+		elif not attack_performed:
+			print_log ('Please perform attack before :)', mode='bad')
+		else:
+
+			check_attack(pubkey, M1, P1)
+
+			GUI(M, pubkey, P, M1, P1, key_generated = True, attack_performed = True)
+	else:
+		print_log ('Bye!', mode='info')
+		return
+
+
+	GUI(M, pubkey, P, M1, P1, key_generated, attack_performed)
+
+
+print_header()
+GUI()
