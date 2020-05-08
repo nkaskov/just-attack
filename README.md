@@ -9,8 +9,8 @@ The [library](https://github.com/gf2crypto/blincodes) for working with linear co
 
 ## Requires:
 
-- [scipy python lib for binoms copmutation (maybe will be removed later)](https://www.scipy.org/install.html)
-- [networkx python lib for graph cliques search](https://networkx.github.io/)
+- [scipy python lib](https://www.scipy.org/install.html) for binoms copmutation (maybe will be removed later);
+- [networkx python lib](https://networkx.github.io/) for graph cliques search.
 
 
 
