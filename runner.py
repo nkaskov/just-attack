@@ -13,7 +13,7 @@ from blincodes import vector
 from blincodes.codes import tools
 
 r = 2
-m = 7
+m = 5
 
 
 
@@ -70,11 +70,14 @@ def gauss_codewords_supports_with_weight_in_range (irmc, M, eps):
 	for vec in tools.iter_codewords(irmc):
 		if vec.hamming_weight >= desired_weight_min and vec.hamming_weight <= desired_weight_max:
 			codewords_supports.append(vec.support)
-			print("Found", len(codewords_supports), "from", M)
-			if len(codewords_supports) == M:
-				return codewords_supports
+			print("Found", len(codewords_supports), "of", M)
+			'''if len(codewords_supports) == M:
+				return codewords_supports'''
+	print(len(codewords_supports))
 
 	print("Bad weight")
+
+	return codewords_supports
 
 def is_graph_ok(Gi):
 
@@ -236,7 +239,23 @@ pubkey = M * rmc * P
 
 print (pubkey)
 
-#rmcgac = gauss_by_min_weighted_row(pubkey)
+codeword_support = gauss_codeword_support_with_weight(pubkey)
+
+print(codeword_support)
+
+rmcgac = gauss_by_min_weighted_row(pubkey, codeword_support)
+
+print(rmcgac)
+
+# Something bad is happening here
+# For (2, 5) parameters, we have only 87 words out of 800
+# Careful calculations of M needed
+supports = gauss_codewords_supports_with_weight_in_range(rmcgac, 800, 0.93)
+
+#print(supports)
+
+
+
 '''
 #print("Result:")
 print(rmcgac)
@@ -247,7 +266,7 @@ print(result_cliques)
 '''
 
 
-codeword_support = gauss_codeword_support_with_weight(pubkey)
+#codeword_support = gauss_codeword_support_with_weight(pubkey)
 #print(codeword_support)
 
-print(gauss_by_min_weighted_row(pubkey, codeword_support))
+#print(gauss_by_min_weighted_row(pubkey, codeword_support))
