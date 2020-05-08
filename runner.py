@@ -13,9 +13,9 @@ from blincodes import vector
 from blincodes.codes import tools
 
 r = 2
-m = 7
+m = 5
 
-cij = [[0 for x in range (2**m - 2**(m - r))] for y in range (2**m - 2**(m - r))]
+
 
 def gauss_by_min_weighted_row (irmc, codeword_support):
 	
@@ -34,7 +34,7 @@ def gauss_by_min_weighted_row (irmc, codeword_support):
 			to_remove.append(j)
 		j+=1
 
-	rmcgar = rmcga.submatrix(codeword_support, True).T.submatrix(to_remove, True).T
+	rmcgar = rmcga.T.submatrix(to_remove, True).T
 
 	return rmcgar
 
@@ -114,9 +114,15 @@ def inner_algo(rmcgac, L):
 
 	codewords_supports = gauss_codewords_supports_with_weight_in_range(rmcgac, eps)
 
-	word_len = 2**m - 2**(m - r)
-
 	print("Supports len:", len(codewords_supports))
+	
+	word_len = 2**m 
+
+	G = nx.Graph()
+	G.add_nodes_from(range(0, word_len))
+
+
+	cij = [[0 for x in range (word_len)] for y in range (word_len)]
 
 	for i in range(0, word_len):
 		for j in range(i + 1, word_len):
@@ -136,35 +142,22 @@ def inner_algo(rmcgac, L):
 			cij_values.add(cij[i][j])
 
 	print("cij values:", cij_values)
-	
-	c = (min(cij_values) + max(cij_values))/2
 
-	G = nx.Graph()
-	G.add_nodes_from(range(0, word_len))
+	c = max(cij_values)
 
-	try_it = 0
+	for i in range(0, word_len):
+		for j in range(i + 1, word_len):
+			if cij[i][j] >= c:
+				#print("Add",i,",",j)
+				G.add_edge(i,j)
 
-	while (True):
+	good_cliques = get_good_cliques(G)
 
-		print("try it ", try_it)
-
-		#c = ceil( L * (2**(m - r + 1) - 2**r) / (2**(m - r) - 1))
-
-		for i in range(0, word_len):
-			for j in range(i + 1, word_len):
-				if cij[i][j]*(try_it + 1) > c:
-					#print("Add",i,",",j)
-					G.add_edge(i,j)
-
-		good_cliques = get_good_cliques(G)
-
-		if len(good_cliques):
-			return good_cliques
-		else:
-			L += step_L
-			
-		try_it += 1
-		c+= 10
+	if len(good_cliques):
+		return good_cliques
+	else:
+		print("Something very bad happened")
+		
 
 def get_b(pbk):
 	B = []
