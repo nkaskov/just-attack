@@ -239,7 +239,7 @@ def solve_smth(gpub):
 def build_a(gpub):
 	a = solve_smth(gpub)
 
-	print("[i]\tvector a:", a)
+	#print("[i]\tvector a:", a)
 
 	removing_num = 0
 
@@ -260,7 +260,7 @@ def get_perm(gpub):
 
 	agpub = build_a(gpub)*gpub
 
-	print("[i]\tAGpub:")
+	#print("[i]\tAGpub:")
 	#print(agpub)
 
 	return matrix.permutation([row.value for row in agpub.T.submatrix([0], True)])
@@ -281,7 +281,7 @@ def inner_step(gpub, x, y):
 	q = ceil((-y)/x)
 	s = q*x + y
 
-	print("q", q, "s", s)
+	#print("q", q, "s", s)
 
 	if s!= 0 and q != 0:
 
@@ -329,9 +329,10 @@ def inner_step(gpub, x, y):
 
 
 def step1(gpub):
+
 	g, x, y = xgcd(m - 1, r)
 
-	print("x", x, "y", y)
+	#print("x", x, "y", y)
 
 	if x == 0 and y == 1:
 		return g, gpub
@@ -343,35 +344,59 @@ def step1(gpub):
 		print("[-]\tBad x y")
 
 def step5(gpub, permuted_rm):
-	
+
+	#print("Gpub size", gpub.nrows, gpub.ncolumns)
+
+	#print("permuted size", permuted_rm.nrows, permuted_rm.ncolumns)
+
 	rows = []
 
 	for i in range(0, gpub.nrows):
 
 		rows.append(permuted_rm.T.solve(gpub[i])[1])
 
-	print("Rows:", rows)
+	#print("Rows:", rows)
 	return matrix.from_vectors(rows)
 	#return matrix.Matrix()
 
 def perform_attack(gpub):
 	
-	g, rmdm = step1(gpub)
+	step1_gpub = gpub
+
+	global r
+	global m
+
+	dual_code = False
+
+	if m <= 2*r:
+
+		dual_code = True
+
+		r = m - 1 - r
+
+		step1_gpub = gpub.orthogonal
+
+
+
+	g, rmdm = step1(step1_gpub)
 
 	if g != 1:
 		basis = get_b(rmdm)
 
 		rmdm = get_two_basis_code (rmdm, basis)
 
-	print("RMDM", rmdm)
+	#print("RMDM", rmdm)
+
+	if dual_code:
+		r = m - 1 - r
 
 	P1 = get_perm(rmdm)
 
-	print("Permutation:\n", P1)
+	#print("Permutation:\n", P1)
 
 	permuted_rm = rm.generator(r,m) * P1
 
-	print("Permuted:\n", permuted_rm)
+	#print("Permuted:\n", permuted_rm)
 
 	M1 = step5(gpub, permuted_rm)
 
