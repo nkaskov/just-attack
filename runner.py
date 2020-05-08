@@ -13,7 +13,7 @@ from blincodes import vector
 from blincodes.codes import tools
 
 r = 2
-m = 5
+m = 7
 
 
 
@@ -40,7 +40,7 @@ def gauss_by_min_weighted_row (irmc, codeword_support):
 
 def gauss_codeword_support_with_weight(irmc, desired_weight = 2**(m - r)):
 
-	print("Desired weight", desired_weight)
+	print("[i]\tDesired weight of codeword:", desired_weight)
 
 	for vec in tools.iter_codewords(irmc):
 		if vec.hamming_weight == desired_weight:
@@ -55,14 +55,14 @@ def gauss_codewords_supports_with_weight_in_range (irmc, eps):
 	desired_weight_min = 2**(m - r)
 	desired_weight_max = floor(float(2**(m - 2*r + 1)*(2**r - 1))*eps)
 
-	print("Desired weight", desired_weight_min, desired_weight_max)
+	print("[i]\tDesired weight range:", desired_weight_min, desired_weight_max)
 
 	codewords_supports = []
 
 	for vec in tools.iter_codewords(irmc):
 		if vec.hamming_weight >= desired_weight_min and vec.hamming_weight <= desired_weight_max:
 			codewords_supports.append(vec.support)
-	print("Found", len(codewords_supports))
+	print("[i]\tFound", len(codewords_supports), "codewords supports in range")
 
 	print("Bad weight")
 
@@ -86,7 +86,7 @@ def get_good_cliques(Gi):
 
 		for clique in cliques:
 			clique_len = len(clique)
-			print("Checking",clique)
+			print("[i]\tChecking",clique)
 			if clique_len >= desired_clique_size:
 				if not clique_len % desired_clique_size:
 
@@ -102,7 +102,7 @@ def get_good_cliques(Gi):
 			return []
 
 		if len(result_cliques) == desired_number_of_cliques:
-			print("Graph consist only of good cliques")
+			print("[+]\tGraph consist only of good cliques")
 			return result_cliques
 
 def inner_algo(rmcgac, L):
@@ -114,8 +114,6 @@ def inner_algo(rmcgac, L):
 
 	codewords_supports = gauss_codewords_supports_with_weight_in_range(rmcgac, eps)
 
-	print("Supports len:", len(codewords_supports))
-	
 	word_len = 2**m 
 
 	G = nx.Graph()
@@ -141,9 +139,11 @@ def inner_algo(rmcgac, L):
 		for j in range(i + 1, word_len):
 			cij_values.add(cij[i][j])
 
-	print("cij values:", cij_values)
+	print("[i]\tcij values:", cij_values)
 
 	c = max(cij_values)
+
+	print("[i]\tThreshold c choosen to", c)
 
 	for i in range(0, word_len):
 		for j in range(i + 1, word_len):
@@ -156,7 +156,7 @@ def inner_algo(rmcgac, L):
 	if len(good_cliques):
 		return good_cliques
 	else:
-		print("Something very bad happened")
+		print("[-]\tSomething very bad happened")
 		
 
 def get_b(pbk):
@@ -167,7 +167,7 @@ def get_b(pbk):
 	for i in range (0, r - 1):
 		desired_b_size += binom(m, i)
 
-	print ("Desired size:", desired_b_size)
+	print ("[i]\tDesired B size:", desired_b_size)
 
 
 	while (True):
@@ -177,9 +177,9 @@ def get_b(pbk):
 
 		fs_supports = inner_algo(pbkc, 100)
 
-		print("Fs supports:", fs_supports)
+		print("[i]\tFs supports:", fs_supports)
 
-		print("Codeword supports:", codeword_support)		
+		print("[i]\tCodeword supports:", codeword_support)		
 
 		fs =[]
 
@@ -189,13 +189,13 @@ def get_b(pbk):
 
 			fs.append(vector.from_support(2**m, tmp_support))
 
-		print("fs:", fs)
+		print("[i]\tfs vectors after extending:", fs)
 
-		print("B:", B)
+		print("[i]\tB:", B)
 
 		Bm = tools.union(matrix.Matrix(B), matrix.Matrix(fs))
 
-		print(Bm)
+		print("[i]\tBm:", Bm)
 
 		#if len(B) == desired_b_size:
 		return Bm
