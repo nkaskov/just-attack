@@ -182,7 +182,7 @@ def get_b(pbk):
 			print("[+]\tB of desired size found on try", try_it)
 			return B
 
-def get_two_basis_code(B1, B2):
+def mult(B1, B2):
 	rows = []
 
 	for row1 in B1:
@@ -190,6 +190,11 @@ def get_two_basis_code(B1, B2):
 			rows.append(row1&row2)
 
 	return matrix.from_vectors([row for row in matrix.from_vectors(rows).gaussian_elimination() if len(row.support)])
+
+
+def get_two_basis_code(B1, B2):
+	return mult(B1.orthogonal, B2).orthogonal
+
 
 def get_random_pubkey():
 
@@ -214,6 +219,6 @@ print("pubkey 1:\n", pubkey1)
 
 print("pubkey 2:\n", pubkey2)
 
-print("result:\n", get_two_basis_code(pubkey1, pubkey2))
+print("result:\n", mult(pubkey1, pubkey2))
 
 
