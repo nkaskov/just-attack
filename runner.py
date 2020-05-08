@@ -197,13 +197,13 @@ def get_b(pbk):
 		print("[i]\tB:")
 		print(B)
 
-		Bm = tools.union(B, matrix.from_vectors(fs))
+		B = tools.union(B, matrix.from_vectors(fs))
 
-		print("[i]\tBm:")
-		print(Bm)
+		print("[i]\tB modified:")
+		print(B)
 
 		if B.nrows == desired_b_size:
-			return Bm
+			return B
 
 
 
