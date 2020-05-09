@@ -229,7 +229,7 @@ def pubkey_gen():
 	P = matrix.permutation(tmp_P)
 	pubkey = M * rmc * P
 
-	return M, pubkey, P
+	return pubkey
 
 def solve_smth(gpub):
 	onev = vector.from_support_supplement(2**m)
@@ -427,8 +427,7 @@ def print_header():
 	print_log ('Please choose your next action:', mode='info')
 
 
-def GUI(M = matrix.Matrix(), pubkey = matrix.Matrix(), P = matrix.Matrix(),
-		M1 = matrix.Matrix(), P1 = matrix.Matrix(), key_generated = False,	attack_performed = False):
+def GUI(pubkey = matrix.Matrix(), M1 = matrix.Matrix(), P1 = matrix.Matrix(), key_generated = False, attack_performed = False):
 	print_log ('1. (Re)generate keys', mode='info')
 	print_log ('2. Perform attack on the generated public key', mode='info')
 	print_log ('3. Check attack result', mode='info')
@@ -446,24 +445,24 @@ def GUI(M = matrix.Matrix(), pubkey = matrix.Matrix(), P = matrix.Matrix(),
 
 		print_log ('Generation of pubkey started...', mode='good')
 
-		M, pubkey, P = pubkey_gen()
+		pubkey= pubkey_gen()
 
 		print_log ('Generation finished.', mode='good')
 
-		print_log ('There is your M matrix:', mode='info')
+		#print_log ('There is your M matrix:', mode='info')
 
-		print(M)
+		#print(M)
 
 		print_log ('There is your pubkey:', mode='info')
 		print(pubkey)
 
-		print_log ('There is your permutation matrix:', mode='info')
-		print(P)
+		#print_log ('There is your permutation matrix:', mode='info')
+		#print(P)
 
 		key_generated = True
 
 
-		GUI(M, pubkey, P, key_generated = True)
+		GUI(pubkey, key_generated = True, attack_performed = False)
 
 	elif user_action == '2':
 		if not key_generated:
@@ -479,14 +478,14 @@ def GUI(M = matrix.Matrix(), pubkey = matrix.Matrix(), P = matrix.Matrix(),
 
 			print_log ('There is found M\' matrix:', mode='info')
 
-			print(M)
+			print(M1)
 
 			print_log ('There is found permutation matrix P\':', mode='info')
-			print(P)
+			print(P1)
 
 			print_log ('')
 
-			GUI(M, pubkey, P, M1, P1, key_generated = True, attack_performed = True)
+			GUI(pubkey, M1, P1, key_generated = True, attack_performed = True)
 
 	elif user_action == '3':
 		if not key_generated:
@@ -497,14 +496,14 @@ def GUI(M = matrix.Matrix(), pubkey = matrix.Matrix(), P = matrix.Matrix(),
 
 			check_attack(pubkey, M1, P1)
 
-			GUI(M, pubkey, P, M1, P1, key_generated = True, attack_performed = True)
+			GUI(pubkey, M1, P1, key_generated = True, attack_performed = True)
 	else:
 		print_log ('Bye!', mode='info')
 		exit()
 		#return
 
 
-	GUI(M, pubkey, P, M1, P1, key_generated, attack_performed)
+	GUI(pubkey, M1, P1, key_generated, attack_performed)
 
 
 print_header()
